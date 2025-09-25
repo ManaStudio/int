@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FRAGMENT[S] — Jeu narratif</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: 'Courier New', monospace;
+      padding: 40px;
+    }
+    #story {
+      white-space: pre-wrap;
+      margin-bottom: 30px;
+    }
+    .choice {
+      display: block;
+      margin: 10px 0;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="story"></div>
+  <div id="choices"></div>
+
+  <script>
+    let gameState = {
+      sceneCount: 0,
+      fragmentLevel: 0,
+      stealth: 0,
+      trust: 0
+    };
+
+    function random(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateScene(state) {
+      const lieux = ["Zone 9", "Bloc 47-B", "Serveur fantôme", "Corridor de transit", "Nœud oublié"];
+      const événements = [
+        "une alerte mentale",
+        "un souvenir fragmenté",
+        "un signal inconnu",
+        "une voix dans ton cortex",
+        "une surcharge de ton implant"
+      ];
+      const menaces = [
+        "un drone traqueur",
+        "une IA rebelle",
+        "un agent du Réseau",
+        "un spectre de données",
+        "une boucle de surveillance"
+      ];
+
+      const lieu = random(lieux);
+      const événement = random(événements);
+      const menace = random(menaces);
+
+      const narration = `Scène ${state.sceneCount + 1} — ${lieu}
+
+Tu te trouves dans ${lieu}. Tu ressens ${événement}. ${menace} approche.  
+Ton implant pulse. Tu sens que quelque chose veut te reconnecter.  
+Mais tu ne sais pas encore si tu es prêt à redevenir ce que tu étais.`;
+
+      const choices = [
+        {
+          text: "1. Fuir",
+          effect: () => { state.stealth += 1; state.sceneCount += 1; }
+        },
+        {
+          text: "2. Interagir avec le signal",
+          effect: () => { state.fragmentLevel += 1; state.sceneCount += 1; }
+        },
+        {
+          text: "3. Te cacher et observer",
+          effect: () => { state.trust += 1; state.sceneCount += 1; }
+        }
+      ];
+
+      return { text: narration, choices };
+    }
+
+    function renderScene() {
+      if (gameState.sceneCount >= 10 || gameState.fragmentLevel >= 5) {
+        endGame();
+        return;
+      }
+
+      const scene = generateScene(gameState);
+      document.getElementById("story").innerText = scene.text;
+      const choicesDiv = document.getElementById("choices");
+      choicesDiv.innerHTML = "";
+
+      scene.choices.forEach(choice => {
+        const btn = document.createElement("div");
+        btn.className = "choice";
+        btn.innerText = choice.text;
+        btn.onclick = () => {
+          choice.effect();
+          renderScene();
+        };
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    function endGame() {
+      let ending = "";
+      if (gameState.fragmentLevel >= 5) {
+        ending = "Tu as reconnecté suffisamment de fragments. Tu redeviens Soren-9, mais tu n’es plus le même. Tu es libre.";
+      } else if (gameState.stealth > gameState.trust) {
+        ending = "Tu as fui assez longtemps. Le Réseau t’oublie. Tu deviens une ombre parmi les ombres.";
+      } else {
+        ending = "Tu as observé, tu as attendu. Mais le monde ne t’a pas choisi. Tu restes un fragment, suspendu entre deux réalités.";
+      }
+
+      document.getElementById("story").innerText = ending;
+      document.getElementById("choices").innerHTML = "";
+    }
+
+    renderScene();
+  </script>
+</body>
+</html>
